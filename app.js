@@ -74,19 +74,6 @@ app.use(routes);
 
 
 /**
- * -------------- SESSION ----------------
- */
-
-// Imports all of the routes from ./routes/index.js
-
-
-
-
-
-
-
-
-/**
  * -------------- SERVER ----------------
  */
 
