@@ -30,14 +30,37 @@ app.use(express.urlencoded({extended: true}));
  * -------------- SESSION SETUP ----------------
  */
 
-// TODO
+const sessionStore = new MongoStore({ mongooseConnection: connection, collection: 'sessions' });
+app.use(session({
+    secret: process.env.SECRET,
+    resave: false,
+    saveUninitialized: true,
+    store: sessionStore,
+    cookie: {
+        maxAge: 1000 * 60 * 60 * 24 // Equals 1 day (1 day * 24 hr/1 day * 60 min/1 hr * 60 sec/1 min * 1000 ms / 1 sec)
+    }
+}));
+
+
+
 
 /**
  * -------------- PASSPORT AUTHENTICATION ----------------
  */
 
+ // Need to require the entire Passport config module so app.js knows about it
+require('./config/passport');
+
 app.use(passport.initialize());
 app.use(passport.session());
+
+app.use((req, res, next) => {
+    console.log(req.session);
+    console.log(req.user);
+    next();
+});
+
+
 
 
 /**
@@ -48,9 +71,28 @@ app.use(passport.session());
 app.use(routes);
 
 
+
+
+/**
+ * -------------- SESSION ----------------
+ */
+
+// Imports all of the routes from ./routes/index.js
+
+
+
+
+
+
+
+
 /**
  * -------------- SERVER ----------------
  */
 
-// Server listens on http://localhost:3000
-app.listen(3000);
+// Server listens on http://localhost:3000 
+var SERVER = app.listen(process.env.PORT || 3001,  process.env.ADDRESS || '127.0.0.1',  () => {
+    let port = SERVER.address().port
+    let host = SERVER.address().address
+    console.log(`Server running on:  http://${host}:${port}`);
+});
