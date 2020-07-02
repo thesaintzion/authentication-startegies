@@ -13,7 +13,7 @@ const MongoStore = require('connect-mongo')(session);
 require('./config/passport');
 
 /**
- * -------------- GENERAL SETUP ----------------
+ * 01 -------------- GENERAL SETUP ----------------
  */
 
 // Gives us access to variables set in the .env file via `process.env.VARIABLE_NAME` syntax
@@ -27,7 +27,7 @@ app.use(express.urlencoded({extended: true}));
 
 
 /**
- * -------------- SESSION SETUP ----------------
+ * 02 -------------- SESSION SETUP ----------------
  */
 
 const sessionStore = new MongoStore({ mongooseConnection: connection, collection: 'sessions' });
@@ -45,18 +45,19 @@ app.use(session({
 
 
 /**
- * -------------- PASSPORT AUTHENTICATION ----------------
+ * 03 -------------- PASSPORT AUTHENTICATION ----------------
  */
 
  // Need to require the entire Passport config module so app.js knows about it
 require('./config/passport');
 
 app.use(passport.initialize());
+//gives access to req.session...
 app.use(passport.session());
 
 app.use((req, res, next) => {
-    console.log(req.session);
-    console.log(req.user);
+    console.log('THE SESSION:', req.session);
+    console.log('THE USER:', req.user);   
     next();
 });
 
@@ -64,11 +65,20 @@ app.use((req, res, next) => {
 
 
 /**
- * -------------- ROUTES ----------------
+ * 04 -------------- ROUTES ----------------
  */
 
 // Imports all of the routes from ./routes/index.js
 app.use(routes);
+const errHandler = (err, req, res, next) =>{
+    if(err){
+  console.log('Error Occured:', err)
+  res.status(500).json({message: 'Oopps..!! An Error Has Occured, Try again later.'})
+    }
+
+}
+app.use(errHandler);
+
 
 
 

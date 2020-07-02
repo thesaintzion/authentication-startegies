@@ -21,8 +21,12 @@ const connection = mongoose.createConnection(conn, {
 });
 
 // Creates simple schema for a User.  The hash and salt are derived from the user's given password when they register
+mongoose.set('useNewUrlParser', true);
+mongoose.set('useCreateIndex', true);
+mongoose.set('useUnifiedTopology', true);
 const UserSchema = new mongoose.Schema({
     username: String,
+    email:{type:String, unique: true},
     hash: String,
     salt: String
 });
