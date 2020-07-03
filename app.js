@@ -6,6 +6,8 @@ var crypto = require('crypto');
 var routes = require('./routes');
 const connection = require('./config/database');
 
+const {issueJWT} = require('./lib/jwtUtils');
+
 // Package documentation - https://www.npmjs.com/package/connect-mongo
 const MongoStore = require('connect-mongo')(session);
 
@@ -54,8 +56,12 @@ require('./config/passport');
 
 app.use(passport.initialize());
 
+require('./config/passport-jwt')(passport);
+
 //gives access to req.session...
 app.use(passport.session());
+
+
 
 app.use((req, res, next) => {
     console.log('THE SESSION:', req.session);
@@ -75,6 +81,12 @@ app.use((req, res, next) => {
 
 // Imports all of the routes from ./routes/index.js
 app.use(routes);
+
+let user = {
+    "_id": "5effa19748d9de2e68c0c6c6"
+}
+issueJWT(user);
+
 const errHandler = (err, req, res, next) =>{
     if(err){
   console.log('Error Occured:', err)

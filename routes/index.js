@@ -1,8 +1,8 @@
 const router = require('express').Router();
 const passport = require('passport');
 const {  encritPassword } = require('../lib/passwordUtils');
+const {issueJWT} = require('../lib/jwtUtils');
 const connection = require('../config/database');
-const { VirtualType } = require('mongoose');
 const User = connection.models.User;
 const  {isAdmin, isAuth} = require('../auth/middilewares');
 
@@ -15,11 +15,18 @@ const  {isAdmin, isAuth} = require('../auth/middilewares');
      console.log('Saint',  req, res);
  });
 
+  // TODO
+  router.post('/login-jwt', passport.authenticate('jwt', {failureRedirect: '/login-failure', successRedirect: '/login-success'}), (req, res, next) => {
+    console.log('Saint',  req, res);
+});
+
 
  // TODO
  router.post('/register', (req, res, next) => {
     async function postData(){
         const {password, username,  email} = req.body;
+       
+
         //Encript password 
         let pass = await encritPassword(password);
         let salt = pass.salt;
@@ -30,11 +37,13 @@ const  {isAdmin, isAuth} = require('../auth/middilewares');
                 res.status(409).json({msg: 'Oopps!! User Exits'}); 
             }else{
             // Create User...
-            let newUser = new User({
+            let newUser = {
                 username,  email , salt, hash
-            });
-            newUser.save().then( userCreated =>{
-                res.status(200).json({msg: 'Your Created', user: userCreated}); 
+            };
+          User.create(newUser).then( userCreated =>{
+            //   const jwt = issueJWT(userCreated);
+            //   console.log('The JWT:', jwt);
+                res.status(200).json({msg: 'User Created', user: userCreated}); 
             }).catch(err => {
                 res.status(500).json({msg: 'Oopps!! Error Creating User', err});  
             })

@@ -5,9 +5,7 @@ const {  validatePassword } = require('../lib/passwordUtils');
 const User = connection.models.User;
 
 
-//All passprtconfig goes here
-// TODO: passport.use();
-// Local Trategy
+// Local Trategy //
 passport.serializeUser((user, done) => {
     done(null, user.id);
   });
@@ -27,7 +25,7 @@ const fields = {
 
 }
 
-const callBack = (username, password, done) => {
+const localCallBack = (username, password, done) => {
         // Check if user exits in the DB...
       User.findOne({ username: username }).then((user) => {
 
@@ -53,9 +51,10 @@ const callBack = (username, password, done) => {
 
 }
 
-const localStrategy = new LocalStrategy(fields, callBack)
+const localStrategy = new LocalStrategy(fields, localCallBack);
 
 passport.use(localStrategy);
+
 
 
 
