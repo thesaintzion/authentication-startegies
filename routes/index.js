@@ -2,6 +2,7 @@ const router = require('express').Router();
 const passport = require('passport');
 const {  encritPassword } = require('../lib/passwordUtils');
 const connection = require('../config/database');
+const { VirtualType } = require('mongoose');
 const User = connection.models.User;
 
 /**
@@ -12,6 +13,7 @@ const User = connection.models.User;
  router.post('/login', passport.authenticate('local', {failureRedirect: '/login-failure', successRedirect: '/login-success'}), (req, res, next) => {
      console.log('Saint',  req, res);
  });
+
 
  // TODO
  router.post('/register', (req, res, next) => {
@@ -30,7 +32,6 @@ const User = connection.models.User;
             let newUser = new User({
                 username,  email , salt, hash
             });
-
             newUser.save().then( userCreated =>{
                 res.status(200).json({msg: 'Your Created', user: userCreated}); 
             }).catch(err => {
@@ -117,6 +118,7 @@ router.get('/logout', (req, res, next) => {
     req.logout();
     res.redirect('/protected-route');
 });
+
 
 router.get('/login-success', (req, res, next) => {
     res.send('<p>You successfully logged in. --> <a href="/protected-route">Go to protected route</a></p>');

@@ -16,6 +16,7 @@ require('./config/passport');
  * 01 -------------- GENERAL SETUP ----------------
  */
 
+
 // Gives us access to variables set in the .env file via `process.env.VARIABLE_NAME` syntax
 require('dotenv').config();
 
@@ -52,14 +53,18 @@ app.use(session({
 require('./config/passport');
 
 app.use(passport.initialize());
+
 //gives access to req.session...
 app.use(passport.session());
 
 app.use((req, res, next) => {
     console.log('THE SESSION:', req.session);
-    console.log('THE USER:', req.user);   
+    console.log('THE USER:', req.user);  
+    // console.log('THE USER ID:',  req.session.passport.user);  
     next();
 });
+
+
 
 
 
@@ -75,7 +80,6 @@ const errHandler = (err, req, res, next) =>{
   console.log('Error Occured:', err)
   res.status(500).json({message: 'Oopps..!! An Error Has Occured, Try again later.'})
     }
-
 }
 app.use(errHandler);
 
