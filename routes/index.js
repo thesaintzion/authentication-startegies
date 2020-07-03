@@ -4,6 +4,7 @@ const {  encritPassword } = require('../lib/passwordUtils');
 const connection = require('../config/database');
 const { VirtualType } = require('mongoose');
 const User = connection.models.User;
+const  {isAdmin, isAuth} = require('../auth/middilewares');
 
 /**
  * -------------- POST ROUTES ----------------
@@ -103,14 +104,10 @@ router.get('/register', (req, res, next) => {
  * 
  * Also, look up what behaviour express session has without a maxage set
  */
-router.get('/protected-route', (req, res, next) => {
-    
-    // This is how you check if a user is authenticated and protect a route.  You could turn this into a custom middleware to make it less redundant
-    if (req.isAuthenticated()) {
+router.get('/protected-route', isAuth, (req, res, next) => {
+ 
         res.send('<h1>You are authenticated</h1><p><a href="/logout">Logout and reload</a></p>');
-    } else {
-        res.send('<h1>You are not authenticated</h1><p><a href="/login">Login</a></p>');
-    }
+   
 });
 
 // Visiting this route logs the user out
@@ -126,6 +123,10 @@ router.get('/login-success', (req, res, next) => {
 
 router.get('/login-failure', (req, res, next) => {
     res.send('You entered the wrong password.');
+});
+
+router.get('/admin',  isAdmin, (req, res, next) => {
+    res.send('WELCOME BACK ADMINITRATOR');
 });
 
 module.exports = router;
