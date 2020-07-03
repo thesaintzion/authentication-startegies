@@ -1,10 +1,11 @@
 const router = require('express').Router();
 const passport = require('passport');
-const {  encritPassword } = require('../lib/passwordUtils');
+const {  encritPassword, validatePassword } = require('../lib/passwordUtils');
 const {issueJWT} = require('../lib/jwtUtils');
 const connection = require('../config/database');
 const User = connection.models.User;
 const  {isAdmin, isAuth} = require('../auth/middilewares');
+
 
 /**
  * -------------- POST ROUTES ----------------
@@ -16,8 +17,32 @@ const  {isAdmin, isAuth} = require('../auth/middilewares');
  });
 
   // TODO
-  router.post('/login-jwt', passport.authenticate('jwt', {failureRedirect: '/login-failure', successRedirect: '/login-success'}), (req, res, next) => {
-    console.log('Saint',  req, res);
+  router.post('/login-jwt', (req, res) => {
+
+    User.findOne({ username: req.body.username }).then((user) => {
+        if (!user) {
+            res.status(404).json({msg: 'No user found.'}); 
+           }else{
+               
+           let isValidPassword = validatePassword(req.body.password, user.hash, user.salt);
+
+           if (isValidPassword ) {
+            const jwt = issueJWT(user);
+            console.log('The JWT LOGIN:', jwt);
+            res.status(200).json({msg: 'User Created', user: user, token: jwt.token,  expiresIn: jwt.expires }); 
+           }else{
+            res.status(400).json({msg: 'Wrong password.'}); 
+           }
+        }
+     
+           
+
+
+      }).catch((err) => {
+        res.status(500).json({msg: 'Error checking if user exits', err }); 
+      });
+
+  
 });
 
 
@@ -41,9 +66,9 @@ const  {isAdmin, isAuth} = require('../auth/middilewares');
                 username,  email , salt, hash
             };
           User.create(newUser).then( userCreated =>{
-            //   const jwt = issueJWT(userCreated);
-            //   console.log('The JWT:', jwt);
-                res.status(200).json({msg: 'User Created', user: userCreated}); 
+                const jwt = issueJWT(userCreated);
+                console.log('The JWT REGISTER:', jwt);
+                res.status(200).json({msg: 'User Created', user: userCreated, token: jwt.token,  expiresIn: jwt.expires }); 
             }).catch(err => {
                 res.status(500).json({msg: 'Oopps!! Error Creating User', err});  
             })
@@ -114,10 +139,15 @@ router.get('/register', (req, res, next) => {
  * Also, look up what behaviour express session has without a maxage set
  */
 router.get('/protected-route', isAuth, (req, res, next) => {
- 
         res.send('<h1>You are authenticated</h1><p><a href="/logout">Logout and reload</a></p>');
    
 });
+
+router.get('/protected-jwt', passport.authenticate('jwt', {session: false}), (req, res, next) => {
+    res.send('<h1>You are authenticated via JWT</h1><p><a href="/logout">Logout and reload</a></p>');
+
+});
+
 
 // Visiting this route logs the user out
 router.get('/logout', (req, res, next) => {

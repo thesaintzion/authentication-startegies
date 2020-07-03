@@ -82,10 +82,10 @@ app.use((req, res, next) => {
 // Imports all of the routes from ./routes/index.js
 app.use(routes);
 
-let user = {
-    "_id": "5effa19748d9de2e68c0c6c6"
-}
-issueJWT(user);
+// let user = {
+//     "_id": "5effa19748d9de2e68c0c6c6"
+// }
+// issueJWT(user);
 
 const errHandler = (err, req, res, next) =>{
     if(err){

@@ -11,7 +11,6 @@ const User = connection.models.User;
 const opts = {
 jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
 secretOrKey: process.env.SECRET,
-algorithms: ['RS256']
 }
 module.exports = (passport) =>{
     const jwtCallback = (jwt_payload, done) => {
