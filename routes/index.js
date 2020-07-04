@@ -23,26 +23,18 @@ const  {isAdmin, isAuth} = require('../auth/middilewares');
         if (!user) {
             res.status(404).json({msg: 'No user found.'}); 
            }else{
-               
            let isValidPassword = validatePassword(req.body.password, user.hash, user.salt);
-
            if (isValidPassword ) {
             const jwt = issueJWT(user);
             console.log('The JWT LOGIN:', jwt);
-            res.status(200).json({msg: 'User Created', user: user, token: jwt.token,  expiresIn: jwt.expires }); 
+            res.status(200).json({msg: `Welcome ${user.username}`, user: user, token: jwt.token,  expiresIn: jwt.expires }); 
            }else{
             res.status(400).json({msg: 'Wrong password.'}); 
            }
         }
-     
-           
-
-
       }).catch((err) => {
         res.status(500).json({msg: 'Error checking if user exits', err }); 
       });
-
-  
 });
 
 
@@ -51,7 +43,6 @@ const  {isAdmin, isAuth} = require('../auth/middilewares');
     async function postData(){
         const {password, username,  email} = req.body;
        
-
         //Encript password 
         let pass = await encritPassword(password);
         let salt = pass.salt;
@@ -92,7 +83,7 @@ const  {isAdmin, isAuth} = require('../auth/middilewares');
  */
 
 router.get('/', (req, res, next) => {
-    const site = `<iframe src="https://google.com"></iframe>`
+    const site = `<iframe src="https://google.com"></iframe>`;
     // res.send('<h1>Home</h1><p>Please <a href="/register">register</a></p>');
 
     User.find({}).then(users =>{
@@ -140,19 +131,20 @@ router.get('/register', (req, res, next) => {
  */
 router.get('/protected-route', isAuth, (req, res, next) => {
         res.send('<h1>You are authenticated</h1><p><a href="/logout">Logout and reload</a></p>');
-   
 });
 
 router.get('/protected-jwt', passport.authenticate('jwt', {session: false}), (req, res, next) => {
-    res.send('<h1>You are authenticated via JWT</h1><p><a href="/logout">Logout and reload</a></p>');
-
+    res.status(200).json({req: req.user});
+    // res.send('<h1>You are authenticated via JWT</h1><p><a href="/logout">Logout and reload</a></p>');
 });
+
+
 
 
 // Visiting this route logs the user out
 router.get('/logout', (req, res, next) => {
     req.logout();
-    res.redirect('/protected-route');
+    res.redirect('/protected-jwt');
 });
 
 

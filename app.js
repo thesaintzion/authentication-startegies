@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const session = require('express-session');
@@ -5,6 +6,8 @@ var passport = require('passport');
 var crypto = require('crypto');
 var routes = require('./routes');
 const connection = require('./config/database');
+const cors = require('cors');
+const app = express();
 
 const {issueJWT} = require('./lib/jwtUtils');
 
@@ -17,15 +20,8 @@ require('./config/passport');
 /**
  * 01 -------------- GENERAL SETUP ----------------
  */
-
-
-// Gives us access to variables set in the .env file via `process.env.VARIABLE_NAME` syntax
-require('dotenv').config();
-
-// Create the Express application
-var app = express();
-
 app.use(express.json());
+app.use(cors());
 app.use(express.urlencoded({extended: true}));
 
 
@@ -37,7 +33,7 @@ const sessionStore = new MongoStore({ mongooseConnection: connection, collection
 app.use(session({
     secret: process.env.SECRET,
     resave: false,
-    saveUninitialized: true,
+    saveUninitialized: false,
     store: sessionStore,
     cookie: {
         maxAge: 1000 * 60 * 60 * 24 // Equals 1 day (1 day * 24 hr/1 day * 60 min/1 hr * 60 sec/1 min * 1000 ms / 1 sec)
@@ -53,13 +49,11 @@ app.use(session({
 
  // Need to require the entire Passport config module so app.js knows about it
 require('./config/passport');
-
 app.use(passport.initialize());
-
 require('./config/passport-jwt')(passport);
 
 //gives access to req.session...
-app.use(passport.session());
+// app.use(passport.session());
 
 
 
